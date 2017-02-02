@@ -1,0 +1,38 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Resources": {
+    "myVPC": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/16",
+        "EnableDnsSupport": "false",
+        "EnableDnsHostnames": "false",
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ECS VPC"
+          }
+        ]
+      }
+    },
+    "subnetA" : {
+       "Type" : "AWS::EC2::Subnet",
+       "Properties" : {
+          "VpcId" : { "Ref" : "myVPC" },
+          "CidrBlock" : "10.0.0.0/24",
+          "AvailabilityZone" : "us-west-1a",
+          "Tags" : [ { "Key" : "Name", "Value" : "ECS Subnet A" } ]
+       }
+    },
+    "subnetC" : {
+         "Type" : "AWS::EC2::Subnet",
+         "Properties" : {
+            "VpcId" : { "Ref" : "myVPC" },
+            "CidrBlock" : "10.0.2.0/24",
+            "AvailabilityZone" : "us-west-1c",
+            "Tags" : [ { "Key" : "Name", "Value" : "ECS Subnet C" } ]
+         }
+      }
+  }
+}
