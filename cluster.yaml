@@ -1,0 +1,17 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Parameters" : {
+    "ecsClusterName" : {
+      "Type" : "String",
+      "Description" : "Cluster name"
+    }
+  },
+  "Resources": {
+    "myCluster" : {
+      "Type": "AWS::ECS::Cluster",
+      "Properties" : {
+        "ClusterName" : { "Ref" : "ecsClusterName" }
+      }
+    }
+  }
+}
