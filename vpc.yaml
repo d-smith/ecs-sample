@@ -40,12 +40,42 @@
         "Tags" : [ {"Key" : "Name", "Value" : "ECS IGW"}]
       }
     },
-    "AttachGateway" : {
+    "attachGateway" : {
        "Type" : "AWS::EC2::VPCGatewayAttachment",
        "Properties" : {
           "VpcId" : { "Ref" : "myVPC" },
           "InternetGatewayId" : { "Ref" : "myInternetGateway" }
        }
+    },
+    "myRouteTable" : {
+       "Type" : "AWS::EC2::RouteTable",
+       "Properties" : {
+          "VpcId" : { "Ref" : "myVPC" },
+          "Tags" : [ { "Key" : "Name", "Value" : "ECS Route Table" } ]
+       }
+    },
+    "publicRouteViaIGW" : {
+        "Type" : "AWS::EC2::Route",
+        "DependsOn" : "attachGateway",
+        "Properties" : {
+           "RouteTableId" : { "Ref" : "myRouteTable" },
+           "DestinationCidrBlock" : "0.0.0.0/0",
+           "GatewayId" : { "Ref" : "myInternetGateway" }
+        }
+    },
+    "subnetARoute" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" :  { "Ref" : "subnetA" },
+        "RouteTableId": { "Ref" : "myRouteTable" }
+      }
+    },
+    "subnetCRoute" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" :  { "Ref" : "subnetC" },
+        "RouteTableId": { "Ref" : "myRouteTable" }
+      }
     }
   }
 }
