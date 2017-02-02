@@ -33,6 +33,19 @@
             "AvailabilityZone" : "us-west-1c",
             "Tags" : [ { "Key" : "Name", "Value" : "ECS Subnet C" } ]
          }
+    },
+    "myInternetGateway" : {
+      "Type" : "AWS::EC2::InternetGateway",
+      "Properties" : {
+        "Tags" : [ {"Key" : "Name", "Value" : "ECS IGW"}]
       }
+    },
+    "AttachGateway" : {
+       "Type" : "AWS::EC2::VPCGatewayAttachment",
+       "Properties" : {
+          "VpcId" : { "Ref" : "myVPC" },
+          "InternetGatewayId" : { "Ref" : "myInternetGateway" }
+       }
+    }
   }
 }
