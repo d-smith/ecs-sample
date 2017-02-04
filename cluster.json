@@ -224,47 +224,16 @@
         "GroupDescription": "ECS Security Group",
         "VpcId": {
           "Ref": "myVPC"
-        }
-      }
-    },
-    "ecsSecurityGroupHTTPinbound":{
-      "Type":"AWS::EC2::SecurityGroupIngress",
-      "Properties":{
-        "GroupId":{
-          "Ref":"ecsSecurityGroup"
         },
-        "IpProtocol":"tcp",
-        "FromPort":"80",
-        "ToPort":"80",
-        "CidrIp":"0.0.0.0/0"
+        "SecurityGroupIngress" : [{
+            "IpProtocol" : "tcp",
+            "FromPort" : "80",
+            "ToPort" : "80",
+            "CidrIp" : "0.0.0.0/0"
+         }]
       }
     },
-    "EcsSecurityGroupSSHinbound":{
-      "Type":"AWS::EC2::SecurityGroupIngress",
-      "Properties":{
-        "GroupId":{
-          "Ref":"ecsSecurityGroup"
-        },
-        "IpProtocol":"tcp",
-        "FromPort":"22",
-        "ToPort":"22",
-        "CidrIp":"0.0.0.0/0"
-      }
-    },
-    "EcsSecurityGroupALBports":{
-      "Type":"AWS::EC2::SecurityGroupIngress",
-      "Properties":{
-        "GroupId":{
-          "Ref":"ecsSecurityGroup"
-        },
-        "IpProtocol":"tcp",
-        "FromPort":"31000",
-        "ToPort":"61000",
-        "SourceSecurityGroupId":{
-          "Ref":"ecsSecurityGroup"
-        }
-      }
-    },
+    
     "containerInstances":{
       "Type":"AWS::AutoScaling::LaunchConfiguration",
       "Properties":{
@@ -295,13 +264,12 @@
             "Fn::Join":[
               "",
               [
-                "#!/bin/bash -xe\n",
+                "#!/bin/bash\n",
                 "echo ECS_CLUSTER=",
                 {
                   "Ref":"myCluster"
                 },
                 " >> /etc/ecs/ecs.config\n",
-                "start ecs\n",
                 "\n"
               ]
             ]
