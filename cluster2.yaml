@@ -98,6 +98,10 @@ Resources:
     Properties:
       SubnetId: !Ref PubSubnetAz2
       RouteTableId: !Ref RouteViaIgw
+  MyCluster:
+    Type: "AWS::ECS::Cluster"
+    Properties:
+        ClusterName: !Ref EcsClusterName
   EcsSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -121,3 +125,22 @@ Resources:
         Fn::Base64: !Sub |
           #!/bin/bash
           echo ECS_CLUSTER=${EcsClusterName} >> /etc/ecs/ecs.config
+  EcsInstanceAsg:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier: [ !Ref PubSubnetAz1, !Ref PubSubnetAz2 ]
+      LaunchConfigurationName: !Ref EcsInstanceLc
+      MinSize: '0'
+      MaxSize: !Ref MaxSize
+      DesiredCapacity: !Ref DesiredCapacity
+      Tags:
+        -
+          Key: Name
+          Value: !Sub "ECS Instance - ${AWS::StackName}"
+          PropagateAtLaunch: 'true'
+        -
+          Key: Description
+          Value: >
+            This instance is the part of the Auto Scaling group which was created
+            through ECS Console
+          PropagateAtLaunch: 'true'
