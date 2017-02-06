@@ -52,6 +52,8 @@ Mappings:
     ap-southeast-2:
       AMIID: ami-5781be34
 Resources:
+
+# Network
   Vpc:
     Type: AWS::EC2::VPC
     Properties:
@@ -98,6 +100,21 @@ Resources:
     Properties:
       SubnetId: !Ref PubSubnetAz2
       RouteTableId: !Ref RouteViaIgw
+
+# Load balancer
+  AlbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ALB Allowed Ports
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+
+
+# ECS 
   MyCluster:
     Type: "AWS::ECS::Cluster"
     Properties:
@@ -109,8 +126,8 @@ Resources:
       VpcId: !Ref Vpc
       SecurityGroupIngress:
         IpProtocol: tcp
-        FromPort: 80
-        ToPort: 80
+        FromPort: 22
+        ToPort: 22
         CidrIp: 0.0.0.0/0
   EcsInstanceLc:
     Type: AWS::AutoScaling::LaunchConfiguration
