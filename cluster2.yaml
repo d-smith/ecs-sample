@@ -161,3 +161,20 @@ Resources:
             This instance is the part of the Auto Scaling group which was created
             through ECS Console
           PropagateAtLaunch: 'true'
+
+# Task definition
+
+  taskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: Service1Task
+      ContainerDefinitions:
+        -
+          Name: service1
+          Image: xtracdev/service1
+          PortMappings:
+            -
+              ContainerPort: 4000
+              HostPort: 0
+          Memory: 300
+
