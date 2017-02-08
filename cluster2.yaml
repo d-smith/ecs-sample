@@ -101,17 +101,6 @@ Resources:
       SubnetId: !Ref PubSubnetAz2
       RouteTableId: !Ref RouteViaIgw
 
-# Load balancer
-  AlbSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: ALB Allowed Ports
-      VpcId: !Ref Vpc
-      SecurityGroupIngress:
-        IpProtocol: tcp
-        FromPort: 80
-        ToPort: 80
-        CidrIp: 0.0.0.0/0
 
 
 # ECS 
@@ -177,4 +166,90 @@ Resources:
               ContainerPort: 4000
               HostPort: 0
           Memory: 300
+
+  # Load balancer
+  AlbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ALB Allowed Ports
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+
+  InboundRule:
+      Type: AWS::EC2::SecurityGroupIngress
+      Properties:
+        IpProtocol: tcp
+        FromPort: '0'
+        ToPort: '65535'
+        SourceSecurityGroupId: !GetAtt AlbSecurityGroup.GroupId
+        GroupId: !GetAtt EcsSecurityGroup.GroupId
+
+  ECSALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: ECSALB
+      Scheme: internet-facing
+      LoadBalancerAttributes:
+      - Key: idle_timeout.timeout_seconds
+        Value: '30'
+      Subnets: [!Ref PubSubnetAz1, !Ref PubSubnetAz2]
+      SecurityGroups: [!Ref 'AlbSecurityGroup']
+
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref 'ECSTG'
+      LoadBalancerArn: !Ref 'ECSALB'
+      Port: '80'
+      Protocol: HTTP
+
+  ECSALBListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    DependsOn: ALBListener
+    Properties:
+      Actions:
+      - Type: forward
+        TargetGroupArn: !Ref 'ECSTG'
+      Conditions:
+      - Field: path-pattern
+        Values: [/service1]
+      ListenerArn: !Ref 'ALBListener'
+      Priority: 1
+
+  ECSTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: ECSALB
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /service1
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Name: ECSTG
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref Vpc
+
+
+  service1:
+    Type: AWS::ECS::Service
+    DependsOn: ALBListener
+    Properties:
+      Cluster: !Ref 'MyCluster'
+      DesiredCount: '2'
+      LoadBalancers:
+      - ContainerName: service1
+        ContainerPort: '4000'
+        TargetGroupArn: !Ref 'ECSTG'
+      Role: 'ecsServiceRole'
+      TaskDefinition: !Ref 'taskDefinition'
+
+
 
