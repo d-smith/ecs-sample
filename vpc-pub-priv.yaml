@@ -4,6 +4,9 @@ Description: >
   or use an existing VPC for ECS deployment
   in Create Cluster Wizard
 Resources:
+
+## VPC with public and private subnets in two availability zones
+
   Vpc:
     Type: AWS::EC2::VPC
     Properties:
@@ -41,6 +44,8 @@ Resources:
       CidrBlock: '10.0.3.0/24'
       AvailabilityZone: !Select [ 2, "Fn::GetAZs": !Ref "AWS::Region" ]
 
+## Gateway and routing
+
   InternetGateway:
     Type: AWS::EC2::InternetGateway
 
@@ -50,7 +55,6 @@ Resources:
       VpcId: !Ref Vpc
       InternetGatewayId: !Ref InternetGateway
   
-
   RouteViaIgw:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -76,42 +80,74 @@ Resources:
       SubnetId: !Ref PubSubnetAz2
       RouteTableId: !Ref RouteViaIgw
 
-  RouteViaNatGW:
+## Private Subnet Az1
+
+  RouteViaNatGW1:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref Vpc
 
-  NAT:
+  NAT1:
     DependsOn: AttachGateway
     Type: AWS::EC2::NatGateway
     Properties:
         AllocationId:
           Fn::GetAtt:
-            - EIP
+            - EIP1
             - AllocationId
         SubnetId:
           Ref: PubSubnetAz1
-  EIP:
+  EIP1:
     Type: AWS::EC2::EIP
     Properties:
         Domain: vpc
-  Route:
+  Route1:
     Type: AWS::EC2::Route
     Properties:
         RouteTableId:
-          Ref: RouteViaNatGW
+          Ref: RouteViaNatGW1
         DestinationCidrBlock: 0.0.0.0/0
         NatGatewayId:
-          Ref: NAT    
+          Ref: NAT1   
 
   PrivateSubnet1RTA:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnetAz1
-      RouteTableId: !Ref RouteViaNatGW
+      RouteTableId: !Ref RouteViaNatGW1
+
+## Private Subnet Az1
+
+  RouteViaNatGW2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+
+  NAT2:
+    DependsOn: AttachGateway
+    Type: AWS::EC2::NatGateway
+    Properties:
+        AllocationId:
+          Fn::GetAtt:
+            - EIP2
+            - AllocationId
+        SubnetId:
+          Ref: PubSubnetAz2
+  EIP2:
+    Type: AWS::EC2::EIP
+    Properties:
+        Domain: vpc
+  Route2:
+    Type: AWS::EC2::Route
+    Properties:
+        RouteTableId:
+          Ref: RouteViaNatGW2
+        DestinationCidrBlock: 0.0.0.0/0
+        NatGatewayId:
+          Ref: NAT2
 
   PrivateSubnet2RTA:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnetAz2
-      RouteTableId: !Ref RouteViaNatGW
+      RouteTableId: !Ref RouteViaNatGW2
