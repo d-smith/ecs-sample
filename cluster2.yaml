@@ -1,8 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  AWS CloudFormation template to create a new VPC
-  or use an existing VPC for ECS deployment
-  in Create Cluster Wizard
+  Create a full stack for two containerized services
 Parameters:
   EcsClusterName:
     Type: String
