@@ -21,6 +21,9 @@ Resources:
       CidrBlock: '10.0.0.0/24'
       AvailabilityZone: !Select [ 0, "Fn::GetAZs": !Ref "AWS::Region" ]
       MapPublicIpOnLaunch: true
+      Tags:
+      - Key: Name
+        Value: public-1
 
   PubSubnetAz2:
     Type: AWS::EC2::Subnet
@@ -29,6 +32,9 @@ Resources:
       CidrBlock: '10.0.1.0/24'
       AvailabilityZone: !Select [ 2, "Fn::GetAZs": !Ref "AWS::Region" ]
       MapPublicIpOnLaunch: true
+      Tags:
+      - Key: Name
+        Value: public-2
 
   PrivateSubnetAz1:
     Type: AWS::EC2::Subnet
@@ -36,6 +42,9 @@ Resources:
       VpcId: !Ref Vpc
       CidrBlock: '10.0.2.0/24'
       AvailabilityZone: !Select [ 0, "Fn::GetAZs": !Ref "AWS::Region" ]
+      Tags:
+      - Key: Name
+        Value: private-1
 
   PrivateSubnetAz2:
     Type: AWS::EC2::Subnet
@@ -43,6 +52,9 @@ Resources:
       VpcId: !Ref Vpc
       CidrBlock: '10.0.3.0/24'
       AvailabilityZone: !Select [ 2, "Fn::GetAZs": !Ref "AWS::Region" ]
+      Tags:
+      - Key: Name
+        Value: private-2
 
 ## Gateway and routing
 
