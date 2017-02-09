@@ -163,3 +163,20 @@ Resources:
     Properties:
       SubnetId: !Ref PrivateSubnetAz2
       RouteTableId: !Ref RouteViaNatGW2
+
+Outputs:
+  StackVPC:
+    Description: The ID of the VPC
+    Value: !Ref Vpc
+    Export:
+      Name: !Sub "${AWS::StackName}-VPCID"
+
+  PrivateSubnet1:
+    Value: !Ref PrivateSubnetAz1
+    Export:
+      Name: !Sub "${AWS::StackName}-PrivateSubnet1"
+
+  PrivateSubnet2:
+    Value: !Ref PrivateSubnetAz2
+    Export:
+      Name: !Sub "${AWS::StackName}-PrivateSubnet2"
