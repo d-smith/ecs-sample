@@ -17,6 +17,7 @@ Resources:
       VpcId: !Ref Vpc
       CidrBlock: '10.0.0.0/24'
       AvailabilityZone: !Select [ 0, "Fn::GetAZs": !Ref "AWS::Region" ]
+      MapPublicIpOnLaunch: true
 
   PubSubnetAz2:
     Type: AWS::EC2::Subnet
@@ -24,6 +25,7 @@ Resources:
       VpcId: !Ref Vpc
       CidrBlock: '10.0.1.0/24'
       AvailabilityZone: !Select [ 2, "Fn::GetAZs": !Ref "AWS::Region" ]
+      MapPublicIpOnLaunch: true
 
   PrivateSubnetAz1:
     Type: AWS::EC2::Subnet
@@ -88,7 +90,7 @@ Resources:
             - EIP
             - AllocationId
         SubnetId:
-          Ref: PrivateSubnetAz1
+          Ref: PubSubnetAz1
   EIP:
     Type: AWS::EC2::EIP
     Properties:
@@ -101,3 +103,15 @@ Resources:
         DestinationCidrBlock: 0.0.0.0/0
         NatGatewayId:
           Ref: NAT    
+
+  PrivateSubnet1RTA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetAz1
+      RouteTableId: !Ref RouteViaNatGW
+
+  PrivateSubnet2RTA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetAz2
+      RouteTableId: !Ref RouteViaNatGW
