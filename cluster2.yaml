@@ -15,11 +15,11 @@ Parameters:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the ECS instances.
   DesiredCapacity:
     Type: Number
-    Default: '1'
+    Default: '2'
     Description: Number of instances to launch in your ECS cluster.
   MaxSize:
     Type: Number
-    Default: '1'
+    Default: '2'
     Description: Maximum number of instances that can be launched in your ECS cluster.
   InstanceType:
     Description: EC2 instance type
@@ -153,7 +153,7 @@ Resources:
 
 # Task definition
 
-  taskDefinition:
+  task1Definition:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Family: Service1Task
@@ -164,6 +164,20 @@ Resources:
           PortMappings:
             -
               ContainerPort: 4000
+              HostPort: 0
+          Memory: 300
+
+  task2Definition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: Service2Task
+      ContainerDefinitions:
+        -
+          Name: service2
+          Image: xtracdev/service2
+          PortMappings:
+            -
+              ContainerPort: 5000
               HostPort: 0
           Memory: 300
 
@@ -201,28 +215,42 @@ Resources:
 
   ALBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
+    DependsOn: ECSALB
     Properties:
       DefaultActions:
       - Type: forward
-        TargetGroupArn: !Ref 'ECSTG'
+        TargetGroupArn: !Ref 'service1TG'
       LoadBalancerArn: !Ref 'ECSALB'
       Port: '80'
       Protocol: HTTP
 
-  ECSALBListenerRule:
+  ECSALBListenerRule1:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
     DependsOn: ALBListener
     Properties:
       Actions:
       - Type: forward
-        TargetGroupArn: !Ref 'ECSTG'
+        TargetGroupArn: !Ref 'service1TG'
       Conditions:
       - Field: path-pattern
         Values: [/service1]
       ListenerArn: !Ref 'ALBListener'
       Priority: 1
 
-  ECSTG:
+  ECSALBListenerRule2:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    DependsOn: ALBListener
+    Properties:
+      Actions:
+      - Type: forward
+        TargetGroupArn: !Ref 'service2TG'
+      Conditions:
+      - Field: path-pattern
+        Values: [/service2]
+      ListenerArn: !Ref 'ALBListener'
+      Priority: 2
+
+  service1TG:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn: ECSALB
     Properties:
@@ -231,7 +259,22 @@ Resources:
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
-      Name: ECSTG
+      Name: service1TG
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref Vpc
+
+  service2TG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: ECSALB
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /service2
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Name: service2TG
       Port: 80
       Protocol: HTTP
       UnhealthyThresholdCount: 2
@@ -247,9 +290,20 @@ Resources:
       LoadBalancers:
       - ContainerName: service1
         ContainerPort: '4000'
-        TargetGroupArn: !Ref 'ECSTG'
+        TargetGroupArn: !Ref 'service1TG'
       Role: 'ecsServiceRole'
-      TaskDefinition: !Ref 'taskDefinition'
+      TaskDefinition: !Ref 'task1Definition'
 
-
+  service2:
+    Type: AWS::ECS::Service
+    DependsOn: ALBListener
+    Properties:
+      Cluster: !Ref 'MyCluster'
+      DesiredCount: '2'
+      LoadBalancers:
+      - ContainerName: service2
+        ContainerPort: '5000'
+        TargetGroupArn: !Ref 'service2TG'
+      Role: 'ecsServiceRole'
+      TaskDefinition: !Ref 'task2Definition'
 
