@@ -180,3 +180,13 @@ Outputs:
     Value: !Ref PrivateSubnetAz2
     Export:
       Name: !Sub "${AWS::StackName}-PrivateSubnet2"
+
+  PublicSubnet1:
+    Value: !Ref PubSubnetAz1
+    Export:
+      Name: !Sub "${AWS::StackName}-PublicSubnet1"
+
+  PublicSubnet2:
+    Value: !Ref PubSubnetAz2
+    Export:
+      Name: !Sub "${AWS::StackName}-PublicSubnet2"
