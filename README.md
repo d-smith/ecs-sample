@@ -1,7 +1,6 @@
-A couple sample services to use with ECS
 # ECS Sample
 
-This project provides terraform templates and some container code to be used for setting up 
+This project provides cloud formation templates and some container code to be used for setting up 
 an ECS sample that includes all the pieces used in a sample application, including
 VPC setup, ECS cluster definition, and ELB v2 configuration.
 
