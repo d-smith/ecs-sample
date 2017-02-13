@@ -4,8 +4,8 @@ This project provides cloud formation templates and some container code to be us
 an ECS sample that includes all the pieces used in a sample application, including
 VPC setup, ECS cluster definition, and ELB v2 configuration.
 
-This template has been used in us-west-1. Note in this region, there are 3 availability zones, but only zone a
-and zone c can be have VPC subnets defined in them.
+This template has been used in us-west-1 and us-east-1. Note in the us-west-1 region, there are 3 availability zones, 
+but only zone a and zone c can be have VPC subnets defined in them.
 
 To use the sample:
 
@@ -14,6 +14,8 @@ To use the sample:
 network information from the vpc setup)
 * Use alb.yml to set up the ELC and to run the hcping container on the cluster nodes to allow
 connectivity and network set up to be verified.
+
+After the stacks have been installed, you can curl the ALB endpoint on the /hcping uri.
 
 Note that the alb script bakes in the docker hub repo name of the hcping container - you may
 need to change this to reflect your set up (and build and push the docker image as well).
