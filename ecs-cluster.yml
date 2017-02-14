@@ -5,6 +5,13 @@ Description: >
   in Create Cluster Wizard
 
 Parameters:
+  AMIType:
+    Type: String
+    AllowedValues:
+      - Amazon
+      - Rancher
+    Default:
+      Amazon
   NetworkStack:
     Type: String
   KeyName:
@@ -57,6 +64,35 @@ Mappings:
     ap-southeast-2:
       AMIID: ami-5781be34
 
+# From https://docs.rancher.com/os/amazon-ecs/
+  RancherRegionToAMI:
+    us-east-1:
+      AMIID: ami-afddf1b8
+    us-west-1:
+      AMIID: ami-9e2174fe
+
+
+# User data base 64 encoded below
+#
+#
+# Amazon:
+#
+#  #!/bin/bash
+#  echo ECS_CLUSTER=${EcsClusterName} >> /etc/ecs/ecs.config
+#
+# Rancher:
+#        #cloud-config
+#        rancher:
+#          environment:
+#            ECS_CLUSTER: ${EcsClusterName}
+#            # Note: You will need to add this variable, if using awslogs for ECS task.
+#            ECS_AVAILABLE_LOGGING_DRIVERS: |-
+#              ["json-file","awslogs"]
+
+
+Conditions:
+  UseAmazonAMI: !Equals [!Ref AMIType, Amazon]
+
 Resources:
 
   MyCluster:
@@ -79,16 +115,29 @@ Resources:
   EcsInstanceLc:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
-      ImageId: !FindInMap [AWSRegionToAMI, !Ref 'AWS::Region', AMIID]
+#      ImageId: !FindInMap [AWSRegionToAMI, !Ref 'AWS::Region', AMIID]
+      ImageId: !If [UseAmazonAMI, !FindInMap [AWSRegionToAMI, !Ref 'AWS::Region', AMIID], !FindInMap [RancherRegionToAMI, !Ref 'AWS::Region', AMIID]]
       InstanceType: !Ref InstanceType
       AssociatePublicIpAddress: true
       IamInstanceProfile: 'ecsInstanceRole'
       KeyName: !Ref KeyName
       SecurityGroups: [ !Ref EcsSecurityGroup ]
       UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash
-          echo ECS_CLUSTER=${EcsClusterName} >> /etc/ecs/ecs.config
+        !If
+          - UseAmazonAMI
+          -  Fn::Base64: !Sub |
+               #!/bin/bash
+               echo ECS_CLUSTER=${EcsClusterName} >> /etc/ecs/ecs.config
+          - Fn::Base64: !Sub |
+              #cloud-config
+              rancher:
+                environment:
+                  ECS_CLUSTER: ${EcsClusterName}
+                  # Note: You will need to add this variable, if using awslogs for ECS task.
+                  ECS_AVAILABLE_LOGGING_DRIVERS: |-
+                    ["json-file","awslogs"]
+
+
 
   EcsInstanceAsg:
     Type: AWS::AutoScaling::AutoScalingGroup
