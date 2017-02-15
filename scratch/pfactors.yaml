@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Create a task definition for the prime factors service
+
+Resources:
+
+  task1Definition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: PrimeFactorsTask
+      ContainerDefinitions:
+        -
+          Name: pf
+          Image: xtracdev/pfactors
+          PortMappings:
+            -
+              ContainerPort: 5000
+              HostPort: 0
+          Memory: 200
