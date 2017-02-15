@@ -1,8 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  AWS CloudFormation template to create a new VPC
-  or use an existing VPC for ECS deployment
-  in Create Cluster Wizard
+  Create an ECS cluster with an auto scale group and launch config definitions. Both
+  the AWS docker AMI and Rancher OS AMI are supported.
 
 Parameters:
   AMIType:

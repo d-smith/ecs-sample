@@ -1,8 +1,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  AWS CloudFormation template to create a new VPC
-  or use an existing VPC for ECS deployment
-  in Create Cluster Wizard
+  AWS CloudFormation template to create a VPC for ECS deployment. This
+  creates public and private subnets in two AZs, has an IGW for load 
+  balancer ingress, and NAT gateways in each AZ to allow access from
+  the private subnets for accessing the ECS and ECR services.
 Resources:
 
 ## VPC with public and private subnets in two availability zones
