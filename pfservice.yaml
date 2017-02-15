@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Create a service based on the pfactors container, which is relatively easy
+  to call in a manner that will trigger CPU based autoscaling reules.
+Parameters:
+  NetworkStack:
+    Type: String
+
+  ECSClusterStack:
+    Type: String
+
+  ALBStack:
+    Type: String
+
+Resources:
+
+  pfactorsTaskDef:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: PrimeFactorsTask
+      ContainerDefinitions:
+        -
+          Name: pf
+          Image: xtracdev/pfactors
+          PortMappings:
+            -
+              ContainerPort: 5000
+              HostPort: 0
+          Memory: 200
+
+  pfactorsTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /pf/1
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Name: pfactorsTG
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 2
+      VpcId:
+        Fn::ImportValue: !Sub "${NetworkStack}-VPCID"
+
+  pfactorsService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster:
+        Fn::ImportValue: !Sub "${ECSClusterStack}-EcsCluster"
+      DesiredCount: '2'
+      LoadBalancers:
+      - ContainerName: pf
+        ContainerPort: '5000'
+        TargetGroupArn: !Ref 'pfactorsTG'
+      Role: 'ecsServiceRole'
+      TaskDefinition: !Ref 'pfactorsTaskDef'
+
+  PFListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+      - Type: forward
+        TargetGroupArn: !Ref 'pfactorsTG'
+      Conditions:
+      - Field: path-pattern
+        Values: [/pf/*]
+      ListenerArn:
+        Fn::ImportValue: !Sub "${ALBStack}-ALBListenerArn"
+      Priority: 2

@@ -113,3 +113,10 @@ Resources:
         TargetGroupArn: !Ref 'hcpingTG'
       Role: 'ecsServiceRole'
       TaskDefinition: !Ref 'hcPingTaskDef'
+
+Outputs:
+  ALBListenerArn:
+    Description: Listener associated with the ALB
+    Value: !Ref 'ALBListener'
+    Export:
+      Name: !Sub "${AWS::StackName}-ALBListenerArn"
