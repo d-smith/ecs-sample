@@ -45,6 +45,7 @@ Resources:
 
   pfactorsService:
     Type: AWS::ECS::Service
+    DependsOn: PFListenerRule
     Properties:
       Cluster:
         Fn::ImportValue: !Sub "${ECSClusterStack}-EcsCluster"
