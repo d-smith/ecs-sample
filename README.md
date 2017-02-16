@@ -14,6 +14,13 @@ To use the sample:
 network information from the vpc setup)
 * Use alb.yml to set up the ELC and to run the hcping container on the cluster nodes to allow
 connectivity and network set up to be verified.
+* Use pfservice.yaml to install a service that adds the prime factors container to the cluster and 
+load balancer. The prime factors service is useful for driving up CPU consumption for the purposes of
+initiating CPU based autoscale events, e.g.
+
+<pre>
+ab -n 1000000 -c 100 -X http.proxy.fmr.com:8000 ECSALB-endpoint.us-east-1.elb.amazonaws.com/pf/25357
+</pre>
 
 After the stacks have been installed, you can curl the ALB endpoint on the /hcping uri.
 
