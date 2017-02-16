@@ -78,7 +78,7 @@ Resources:
       MaxCapacity: 12
       MinCapacity: 2
       ResourceId: 
-        !Join ['', [service/, 'Fn::ImportValue: !Sub "${ECSClusterStack}-EcsCluster"', /, !GetAtt [pfactorsService, Name]]]
+        !Join ['', [service/, "Fn::ImportValue": !Sub "${ECSClusterStack}-EcsCluster", /, !GetAtt [pfactorsService, Name]]]
       RoleARN: !GetAtt [AutoscalingRole, Arn]
       ScalableDimension: ecs:service:DesiredCount
       ServiceNamespace: ecs
