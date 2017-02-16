@@ -19,7 +19,7 @@ load balancer. The prime factors service is useful for driving up CPU consumptio
 initiating CPU based autoscale events, e.g.
 
 <pre>
-ab -n 1000000 -c 100 -X http.proxy.fmr.com:8000 ECSALB-endpoint.us-east-1.elb.amazonaws.com/pf/25357
+ab -n 1000000 -c 100 -X proxy-host:port ECSALB-endpoint.us-east-1.elb.amazonaws.com/pf/25357
 </pre>
 
 After the stacks have been installed, you can curl the ALB endpoint on the /hcping uri.
