@@ -27,6 +27,7 @@ Resources:
               ContainerPort: 5000
               HostPort: 0
           Memory: 200
+          Cpu: 500
 
   pfactorsTG:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -69,3 +70,34 @@ Resources:
       ListenerArn:
         Fn::ImportValue: !Sub "${ALBStack}-ALBListenerArn"
       Priority: 2
+
+  ServiceScalingTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: pfactorsService
+    Properties:
+      MaxCapacity: 12
+      MinCapacity: 2
+      ResourceId: 
+        !Join ['', [service/, 'Fn::ImportValue: !Sub "${ECSClusterStack}-EcsCluster"', /, !GetAtt [pfactorsService, Name]]]
+      RoleARN: !GetAtt [AutoscalingRole, Arn]
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+  AutoscalingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [application-autoscaling.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+      - PolicyName: service-autoscaling
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: ['application-autoscaling:*', 'cloudwatch:DescribeAlarms', 'cloudwatch:PutMetricAlarm',
+              'ecs:DescribeServices', 'ecs:UpdateService']
+            Resource: '*' 
