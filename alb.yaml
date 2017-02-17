@@ -9,6 +9,9 @@ Parameters:
   ECSClusterStack:
     Type: String
 
+  LoadBalancerName:
+    Type: String
+
 Resources:
 
   hcPingTaskDef:
@@ -50,7 +53,7 @@ Resources:
   ECSALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: ECSALB
+      Name: !Ref LoadBalancerName
       Scheme: internet-facing
       LoadBalancerAttributes:
       - Key: idle_timeout.timeout_seconds

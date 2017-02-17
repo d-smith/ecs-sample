@@ -27,6 +27,7 @@ Resources:
               ContainerPort: 5000
               HostPort: 0
           Memory: 200
+          Cpu: 500
 
   pfactorsTG:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -69,3 +70,105 @@ Resources:
       ListenerArn:
         Fn::ImportValue: !Sub "${ALBStack}-ALBListenerArn"
       Priority: 2
+
+  scalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: pfactorsService
+    Properties:
+      MaxCapacity: 12
+      MinCapacity: 2
+      ResourceId: 
+        !Join ['', [service/, "Fn::ImportValue": !Sub "${ECSClusterStack}-EcsCluster", /, !GetAtt [pfactorsService, Name]]]
+      RoleARN: !GetAtt [AutoscalingRole, Arn]
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+  AutoscalingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [application-autoscaling.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+      - PolicyName: service-autoscaling
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: ['application-autoscaling:*', 'cloudwatch:DescribeAlarms', 'cloudwatch:PutMetricAlarm',
+              'ecs:DescribeServices', 'ecs:UpdateService']
+            Resource: '*' 
+
+  HighECSCPU:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: True
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: CPUUtilization
+      Namespace: AWS/ECS
+      Period: 300
+      Statistic: Average
+      Threshold: 75.0
+      AlarmActions:
+      - !Ref ScaleOutECSService
+      Dimensions:
+      - Name: ServiceName
+        Value: !GetAtt [pfactorsService, Name]
+      - Name: ClusterName
+        Value: 
+          "Fn::ImportValue": !Sub "${ECSClusterStack}-EcsCluster"
+
+  ScaleOutECSService:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: ScaleOutService
+      PolicyType: StepScaling
+      ScalingTargetId:
+        Ref: scalableTarget
+      StepScalingPolicyConfiguration:
+        AdjustmentType: PercentChangeInCapacity
+        Cooldown: 500
+        MetricAggregationType: Average
+        StepAdjustments:
+        - MetricIntervalLowerBound: 0
+          ScalingAdjustment: 100
+
+  LowECSCPU:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: True
+      ComparisonOperator: LessThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: CPUUtilization
+      Namespace: AWS/ECS
+      Period: 300
+      Statistic: Average
+      Threshold: 25.0
+      AlarmActions:
+      - !Ref ScaleInECSService
+      Dimensions:
+      - Name: ServiceName
+        Value: !GetAtt [pfactorsService, Name]
+      - Name: ClusterName
+        Value: 
+          "Fn::ImportValue": !Sub "${ECSClusterStack}-EcsCluster"
+
+
+  ScaleInECSService:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: ScaleInService
+      PolicyType: StepScaling
+      ScalingTargetId:
+        Ref: scalableTarget
+      StepScalingPolicyConfiguration:
+        AdjustmentType: PercentChangeInCapacity
+        Cooldown: 500
+        MetricAggregationType: Average
+        StepAdjustments:
+        - MetricIntervalUpperBound: 0
+          ScalingAdjustment: -50
