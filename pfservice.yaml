@@ -115,7 +115,7 @@ Resources:
       Threshold: 75.0
       AlarmActions:
       - !Ref ScaleOutECSService
-      Diminsions:
+      Dimensions:
       - Name: ServiceName
         Value: !GetAtt [pfactorsService, Name]
       - Name: ClusterName
