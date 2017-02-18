@@ -114,7 +114,6 @@ Resources:
   EcsInstanceLc:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
-#      ImageId: !FindInMap [AWSRegionToAMI, !Ref 'AWS::Region', AMIID]
       ImageId: !If [UseAmazonAMI, !FindInMap [AWSRegionToAMI, !Ref 'AWS::Region', AMIID], !FindInMap [RancherRegionToAMI, !Ref 'AWS::Region', AMIID]]
       InstanceType: !Ref InstanceType
       AssociatePublicIpAddress: true
@@ -145,7 +144,7 @@ Resources:
       - Fn::ImportValue: !Sub "${NetworkStack}-PrivateSubnet1"
       - Fn::ImportValue: !Sub "${NetworkStack}-PrivateSubnet2"
       LaunchConfigurationName: !Ref EcsInstanceLc
-      MinSize: '0'
+      MinSize: '1'
       MaxSize: !Ref MaxSize
       DesiredCapacity: !Ref DesiredCapacity
       Tags:
@@ -159,6 +158,62 @@ Resources:
             This instance is the part of the Auto Scaling group which was created
             through ECS Console
           PropagateAtLaunch: 'true'
+
+  ScaleECSClusterOut:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: PercentChangeInCapacity
+      PolicyType: StepScaling
+      StepAdjustments:
+      - ScalingAdjustment: 100
+        MetricIntervalLowerBound: 0.0
+      AutoScalingGroupName:
+        Ref: EcsInstanceAsg
+
+  ScaleECSClusterIn:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: PercentChangeInCapacity
+      PolicyType: StepScaling
+      StepAdjustments:
+      - ScalingAdjustment: -50
+        MetricIntervalUpperBound: 0.0
+      AutoScalingGroupName:
+        Ref: EcsInstanceAsg
+
+  ECSClusterScaleInAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: True
+      ComparisonOperator: LessThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: CPUReservation
+      Namespace: AWS/ECS
+      Period: 300
+      Statistic: Average
+      Threshold: 25
+      AlarmActions:
+      - Ref: ScaleECSClusterIn
+      Dimensions:
+      - Name: ClusterName
+        Value: !Ref EcsClusterName
+
+  ECSClusterScaleOutAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: True
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: CPUReservation
+      Namespace: AWS/ECS
+      Period: 300
+      Statistic: Average
+      Threshold: 75
+      AlarmActions:
+      - Ref: ScaleECSClusterOut
+      Dimensions:
+      - Name: ClusterName
+        Value: !Ref EcsClusterName
 
 Outputs:
   StackEcsSecurityGroupId:
