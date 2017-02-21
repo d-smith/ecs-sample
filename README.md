@@ -16,10 +16,37 @@ network information from the vpc setup)
 connectivity and network set up to be verified.
 * Use pfservice.yaml to install a service that adds the prime factors container to the cluster and 
 load balancer. The prime factors service is useful for driving up CPU consumption for the purposes of
-initiating CPU based autoscale events, e.g.
+initiating CPU based autoscale events.
+
+As an example:
 
 <pre>
-ab -n 1000000 -c 100 -X proxy-host:port ECSALB-endpoint.us-east-1.elb.amazonaws.com/pf/25357
+aws cloudformation create-stack \
+--stack-name network-a \
+--template-body file://$PWD/vpc-pub-priv.yaml
+
+aws cloudformation create-stack \
+--stack-name ecs-rancher \
+--template-body file://$PWD/ecs-cluster.yml \
+--parameters ParameterKey=AMIType,ParameterValue=Rancher \
+ParameterKey=NetworkStack,ParameterValue=network-a \
+ParameterKey=KeyName,ParameterValue=MyKeyName \
+ParameterKey=EcsClusterName,ParameterValue=cluster-east
+
+aws cloudformation create-stack \
+--stack-name alb-east \
+--template-body file://$PWD/alb.yaml \
+--parameters ParameterKey=NetworkStack,ParameterValue=network-a \
+ParameterKey=ECSClusterStack,ParameterValue=ecs-rancher \
+ParameterKey=LoadBalancerName,ParameterValue=alice
+
+aws cloudformation create-stack \
+--stack-name pf \
+--template-body file://$PWD/pfservice.yaml \
+--parameters ParameterKey=NetworkStack,ParameterValue=network-a \
+ParameterKey=ECSClusterStack,ParameterValue=ecs-rancher \
+ParameterKey=ALBStack,ParameterValue=alb-east \
+--capabilities CAPABILITY_IAM
 </pre>
 
 After the stacks have been installed, you can curl the ALB endpoint on the /hcping uri.

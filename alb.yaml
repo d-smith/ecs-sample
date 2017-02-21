@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  Create a load balancer that initially makes a config hc available for pinding through the 
+  Create a load balancer that initially makes a config hc available for pinging through the 
   load balancer, and to which additional services can be added.
 Parameters:
   NetworkStack:
