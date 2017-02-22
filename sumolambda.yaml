@@ -28,7 +28,7 @@ Resources:
       Runtime: "nodejs4.3"
       Timeout: "25"
 
-## TODO - parameterize the principle so this can port to other regions
+## TODO - parameterize the principal so this can port to other regions
   LambdaInvokePermission: 
     Type: "AWS::Lambda::Permission"
     Properties: 
