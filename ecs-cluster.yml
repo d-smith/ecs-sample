@@ -123,9 +123,9 @@ Resources:
       UserData:
         !If
           - UseAmazonAMI
-          -  Fn::Base64: !Sub |
-               #!/bin/bash
-               echo ECS_CLUSTER=${EcsClusterName} >> /etc/ecs/ecs.config
+          - Fn::Base64: !Sub |
+              #!/bin/bash
+              echo ECS_CLUSTER=${EcsClusterName} >> /etc/ecs/ecs.config
           - Fn::Base64: !Sub |
               #cloud-config
               rancher:
@@ -144,7 +144,7 @@ Resources:
       - Fn::ImportValue: !Sub "${NetworkStack}-PrivateSubnet1"
       - Fn::ImportValue: !Sub "${NetworkStack}-PrivateSubnet2"
       LaunchConfigurationName: !Ref EcsInstanceLc
-      MinSize: '1'
+      MinSize: '2'
       MaxSize: !Ref MaxSize
       DesiredCapacity: !Ref DesiredCapacity
       Tags:

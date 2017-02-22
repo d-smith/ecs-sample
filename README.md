@@ -61,3 +61,14 @@ can be used in ECS samples:
 docker run -p 5000:5000 xtracdev/service2
 docker run -p 4000:4000 xtracdev/service1
 </pre>
+
+## Logging Notes
+
+Setting up cloud watch logs is a bit of a pain if you want the docker runtime log, but long story short is the ecs
+container role must have the appropriate access granted and the user data
+must be configured to set up the logging service. See
+[here](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_cloudwatch_logs.html)
+for details.
+
+If you just want the container out, then create a cloud watch log group, and configure awslog as
+the logging driver in the task definition.

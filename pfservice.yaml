@@ -14,6 +14,12 @@ Parameters:
 
 Resources:
 
+  CloudwatchLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Join ['-', [ECSLogGroup, !Ref 'AWS::StackName']]
+      RetentionInDays: 14
+
   pfactorsTaskDef:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -28,6 +34,12 @@ Resources:
               HostPort: 0
           Memory: 200
           Cpu: 500
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref 'CloudwatchLogsGroup'
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: ecs-demo-app
 
   pfactorsTG:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
