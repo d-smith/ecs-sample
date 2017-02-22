@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Create a lambda function for shipping cloudwatch logs to sumo
+
+Parameters:
+  SumoEndpoint:
+    Type: String
+
+  CodeFileName:
+    Type: String
+
+  CodeBucketName:
+    Type: String
+
+Resources:
+
+  Logs2Sumo:
+    Type: "AWS::Lambda::Function"
+    Properties: 
+      Environment:
+        Variables:
+            SUMO_ENDPOINT: !Ref SumoEndpoint
+      Handler: "index.handler"
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code: 
+        S3Bucket: !Ref CodeBucketName
+        S3Key: !Ref CodeFileName
+      Runtime: "nodejs4.3"
+      Timeout: "25"
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:*
+            Resource: arn:aws:logs:*:*:*
+
+Outputs:
+    LambdaArn:
+        Value: !GetAtt Logs2Sumo.Arn
+        Export:
+            Name: !Sub "${AWS::StackName}-LambdaArn"
