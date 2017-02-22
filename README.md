@@ -72,3 +72,9 @@ for details.
 
 If you just want the container out, then create a cloud watch log group, and configure awslog as
 the logging driver in the task definition.
+
+### Sumo Integration
+
+Before you can create the sumo integration piece via sumo lambda function stack,
+you need to create an s3 bucked, zip up the [sumo cloud watch lambda function](https://github.com/SumoLogic/sumologic-aws-lambda/tree/master/cloudwatchlogs),
+and drop it into the S3 bucket. The bucket name and zip file name are referenced as stack parameters.

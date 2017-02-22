@@ -12,6 +12,9 @@ Parameters:
   ALBStack:
     Type: String
 
+  SumoLambdaStack:
+    Type: String
+
 Resources:
 
   CloudwatchLogsGroup:
@@ -19,6 +22,15 @@ Resources:
     Properties:
       LogGroupName: !Join ['-', [ECSLogGroup, !Ref 'AWS::StackName']]
       RetentionInDays: 14
+
+  LogSubscriptionFilter: 
+    Type: "AWS::Logs::SubscriptionFilter"
+    Properties: 
+      LogGroupName: 
+        Ref: "CloudwatchLogsGroup"
+      FilterPattern: ""
+      DestinationArn: 
+        Fn::ImportValue: !Sub "${SumoLambdaStack}-LambdaArn"
 
   pfactorsTaskDef:
     Type: AWS::ECS::TaskDefinition
