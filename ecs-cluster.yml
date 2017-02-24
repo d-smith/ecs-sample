@@ -63,30 +63,27 @@ Mappings:
     ap-southeast-2:
       AMIID: ami-5781be34
 
-# From https://docs.rancher.com/os/amazon-ecs/
+# Rancher AMIs via https://github.com/rancher/os/blob/master/README.md
   RancherRegionToAMI:
     us-east-1:
-      AMIID: ami-afddf1b8
+      AMIID: ami-f200cee4
+    us-east-2:
+      AMIID: ami-eefadf8b
     us-west-1:
-      AMIID: ami-9e2174fe
+      AMIID: ami-e3045b83
+    us-west-2:
+      AMIID: ami-e26bec82
+    eu-west-1:
+      AMIID: ami-aa2d0ccc
+    eu-central-1:
+      AMIID: ami-5af93235
+    ap-northeast-1:
+      AMIID: ami-5791dd30
+    ap-southeast-1:
+      AMIID: ami-a306b1c0
+    ap-southeast-2:
+      AMIID: ami-8aa4a5e9
 
-
-# User data base 64 encoded below
-#
-#
-# Amazon:
-#
-#  #!/bin/bash
-#  echo ECS_CLUSTER=${EcsClusterName} >> /etc/ecs/ecs.config
-#
-# Rancher:
-#        #cloud-config
-#        rancher:
-#          environment:
-#            ECS_CLUSTER: ${EcsClusterName}
-#            # Note: You will need to add this variable, if using awslogs for ECS task.
-#            ECS_AVAILABLE_LOGGING_DRIVERS: |-
-#              ["json-file","awslogs"]
 
 
 Conditions:
