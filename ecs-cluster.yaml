@@ -217,7 +217,7 @@ Outputs:
     Description: Security group id of the ECS cluster instances
     Value: !GetAtt EcsSecurityGroup.GroupId
     Export:
-      Name: !Sub "${AWS::StackName}-EcsSecurityGroupID"
+      Name: !Sub "${AWS::StackName}-AppServerSecurityGroupID"
 
   StackEcsCluster:
     Value: !Ref MyCluster

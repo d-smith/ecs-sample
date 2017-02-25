@@ -48,7 +48,7 @@ Resources:
         ToPort: '65535'
         SourceSecurityGroupId: !GetAtt AlbSecurityGroup.GroupId
         GroupId: 
-          Fn::ImportValue: !Sub "${ECSClusterStack}-EcsSecurityGroupID"
+          Fn::ImportValue: !Sub "${ECSClusterStack}-AppServerSecurityGroupID"
 
   ECSALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
