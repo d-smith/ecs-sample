@@ -89,3 +89,8 @@ openssl genrsa 2048 > privatekey.pem
 openssl req -new -key privatekey.pem -out csr.pem
 openssl x509 -req -days 365 -in csr.pem -signkey privatekey.pem -out server.crt
 </pre>
+
+## Obtaining Certificate ARNs
+
+The alb stack requires a certificate ARN as an input. The easiest way to
+obtain one is via the aws cli: `aws acm --list-certificates`
