@@ -78,3 +78,14 @@ the logging driver in the task definition.
 Before you can create the sumo integration piece via sumo lambda function stack,
 you need to create an s3 bucked, zip up the [sumo cloud watch lambda function](https://github.com/SumoLogic/sumologic-aws-lambda/tree/master/cloudwatchlogs),
 and drop it into the S3 bucket. The bucket name and zip file name are referenced as stack parameters.
+
+## Self Signed Certificate
+
+For dev if you can tolerate a self signed certificate, here's how to generate
+one for import into the AWS ACM
+
+<pre>
+openssl genrsa 2048 > privatekey.pem
+openssl req -new -key privatekey.pem -out csr.pem
+openssl x509 -req -days 365 -in csr.pem -signkey privatekey.pem -out server.crt
+</pre>
