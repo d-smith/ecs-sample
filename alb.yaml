@@ -11,6 +11,9 @@ Parameters:
 
   LoadBalancerName:
     Type: String
+    
+  CertificateArn:
+    Type: String
 
 Resources:
 
@@ -36,8 +39,8 @@ Resources:
         Fn::ImportValue: !Sub "${NetworkStack}-VPCID"
       SecurityGroupIngress:
         IpProtocol: tcp
-        FromPort: 80
-        ToPort: 80
+        FromPort: 443
+        ToPort: 443
         CidrIp: 0.0.0.0/0
 
   InboundRule:
@@ -67,12 +70,14 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn: ECSALB
     Properties:
+      Certificates:
+      - CertificateArn: !Ref CertificateArn
       DefaultActions:
       - Type: forward
         TargetGroupArn: !Ref 'hcpingTG'
       LoadBalancerArn: !Ref 'ECSALB'
-      Port: '80'
-      Protocol: HTTP
+      Port: '443'
+      Protocol: HTTPS
 
   ECSALBListenerRule1:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
@@ -123,3 +128,15 @@ Outputs:
     Value: !Ref 'ALBListener'
     Export:
       Name: !Sub "${AWS::StackName}-ALBListenerArn"
+
+  ALBDnsName:
+    Description: DNSName associated with the ALB
+    Value: !GetAtt ECSALB.DNSName
+    Export:
+      Name: !Sub "${AWS::StackName}-ALBDnsName"
+
+  HostedZoneId:
+    Description: Hosted zone id associated with the ELB
+    Value: !GetAtt ECSALB.CanonicalHostedZoneID
+    Export:
+      Name: !Sub "${AWS::StackName}-HostedZoneId"

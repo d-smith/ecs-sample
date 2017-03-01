@@ -78,3 +78,33 @@ the logging driver in the task definition.
 Before you can create the sumo integration piece via sumo lambda function stack,
 you need to create an s3 bucked, zip up the [sumo cloud watch lambda function](https://github.com/SumoLogic/sumologic-aws-lambda/tree/master/cloudwatchlogs),
 and drop it into the S3 bucket. The bucket name and zip file name are referenced as stack parameters.
+
+## Self Signed Certificate
+
+For dev if you can tolerate a self signed certificate, here's how to generate
+one for import into the AWS ACM
+
+<pre>
+openssl genrsa 2048 > privatekey.pem
+openssl req -new -key privatekey.pem -out csr.pem
+openssl x509 -req -days 365 -in csr.pem -signkey privatekey.pem -out server.crt
+</pre>
+
+## Obtaining Certificate ARNs
+
+The alb stack requires a certificate ARN as an input. The easiest way to
+obtain one is via the aws cli: `aws acm --list-certificates`
+
+## Route 53 Parameters
+
+Use the AWS CLI to find the zone name to form the record set for. This can
+be done via `aws route53 list-hosted-zones'. The name is the last component
+of the Config Id property - for example if Id is /hostedzone/xxx then the 
+zone name is xxx.
+
+To form the domain name parameter, combine the name you are associating with
+the load balancer with the parent name associated with the hosted zone.
+
+For example, in the hosted zone config if the name is `foo.com.` and you
+want to associate `dev` in that domain with the load balancer, then
+for the domain name parameter you would specify `dev.foo.com`. 
