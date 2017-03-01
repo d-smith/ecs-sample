@@ -37,7 +37,7 @@ Resources:
                 - "Logs2Sumo"
                 - "Arn"
         Action: "lambda:InvokeFunction"
-        Principal: "logs.us-east-1.amazonaws.com"
+        Principal: !Join [ "", [ "logs.", !Ref "AWS::Region", ".amazonaws.com" ] ]
         SourceAccount: 
             Ref: "AWS::AccountId"
 
