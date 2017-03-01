@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Create a record set for a hosted zone to associate an alias with
+  the elb name.
+Parameters:
+  ALBStack:
+    Type: String
+  ZoneName:
+    Type: String
+  DomainName:
+    Type: String
+
+Resources:
+
+  MyRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Ref DomainName
+      HostedZoneName: !Ref ZoneName
+      Type: A
+      AliasTarget:
+        DNSName: 
+          Fn::ImportValue: !Sub "${ALBStack}-ALBDnsName" 
+        HostedZoneId: 
+          Fn::ImportValue: !Sub "${ALBStack}-HostedZoneId"
+

@@ -134,3 +134,9 @@ Outputs:
     Value: !GetAtt ECSALB.DNSName
     Export:
       Name: !Sub "${AWS::StackName}-ALBDnsName"
+
+  HostedZoneId:
+    Description: Hosted zone id associated with the ELB
+    Value: !GetAtt ECSALB.CanonicalHostedZoneID
+    Export:
+      Name: !Sub "${AWS::StackName}-HostedZoneId"
