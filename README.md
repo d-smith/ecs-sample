@@ -94,3 +94,17 @@ openssl x509 -req -days 365 -in csr.pem -signkey privatekey.pem -out server.crt
 
 The alb stack requires a certificate ARN as an input. The easiest way to
 obtain one is via the aws cli: `aws acm --list-certificates`
+
+## Route 53 Parameters
+
+Use the AWS CLI to find the zone name to form the record set for. This can
+be done via `aws route53 list-hosted-zones'. The name is the last component
+of the Config Id property - for example if Id is /hostedzone/xxx then the 
+zone name is xxx.
+
+To form the domain name parameter, combine the name you are associating with
+the load balancer with the parent name associated with the hosted zone.
+
+For example, in the hosted zone config if the name is `foo.com.` and you
+want to associate `dev` in that domain with the load balancer, then
+for the domain name parameter you would specify `dev.foo.com`. 
