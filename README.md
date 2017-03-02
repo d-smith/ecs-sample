@@ -69,13 +69,10 @@ After the stacks have been installed, you can curl the ALB endpoint on the /hcpi
 Note that the alb script bakes in the docker hub repo name of the hcping container - you may
 need to change this to reflect your set up (and build and push the docker image as well).
 
-There are two sample images here which can be built and run locally, plus can be used to define ECS tasks which
-can be used in ECS samples:
+The container referenced in the templates can be build from the code in this project.
+It can be run locally via `docker run -p 5000:5000 xtracdev/pfactors`
 
-<pre>
-docker run -p 5000:5000 xtracdev/service2
-docker run -p 4000:4000 xtracdev/service1
-</pre>
+The local endpoint can be curled via `curl localhost:5000/pf/1337`
 
 ## Logging Notes
 
