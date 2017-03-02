@@ -3,7 +3,8 @@
 ## Caveats
 
 This is a PoC of cloud formation templates for a single region ECS application. There are some important
-next steps that need to be done to make this more useful:
+next steps that need to be done to make this work outside my account context, and to include some
+missing functionality:
 
 * Currently the templates rely on some IAM roles being present in the account where the templates are
 run. The creation of the roles and policies used with this template will need to be extracted before they
