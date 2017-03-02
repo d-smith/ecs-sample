@@ -136,6 +136,7 @@ Resources:
 
   EcsInstanceAsg:
     Type: AWS::AutoScaling::AutoScalingGroup
+    DependsOn: MyCluster
     Properties:
       VPCZoneIdentifier:
       - Fn::ImportValue: !Sub "${NetworkStack}-PrivateSubnet1"
