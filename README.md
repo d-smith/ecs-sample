@@ -1,5 +1,20 @@
 # ECS Sample
 
+## Caveats
+
+This is a PoC of cloud formation templates for a single region ECS application. There are some important
+next steps that need to be done to make this more useful:
+
+* Currently the templates rely on some IAM roles being present in the account where the templates are
+run. The creation of the roles and policies used with this template will need to be extracted before they
+can be more broadly reused.
+* These templates were originally started using HTTP then transitioned  to HTTPS - they need to be 
+closely reviewed to make sure the transition was done cleanly.
+* The stack should pull the demo images from an ECS registry, not docker hub.
+* The AWS WAF should be included at the perimeter.
+
+## Overview
+
 This project provides cloud formation templates and some container code to be used for setting up 
 an ECS sample that includes all the pieces used in a sample application, including
 VPC setup, ECS cluster definition, and ELB v2 configuration.
