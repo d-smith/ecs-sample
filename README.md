@@ -14,6 +14,16 @@ closely reviewed to make sure the transition was done cleanly.
 * The stack should pull the demo images from an ECS registry, not docker hub.
 * The AWS WAF should be included at the perimeter.
 
+## EC2 Platform Note
+
+The vpc template assumes the EC2 platform is VPC, and that the default subnets have not been
+delete from the account. If this assumption does not hold, there could be problems running the template in EC2 classic
+platforms based on the differences in how !GetAZs behaves. For example, in us-west-1, for the EC2 Classic
+platform, 3 AZs are returned, only two of which may contain VPC subnets (indexes 0 and 2). When run
+from an account that supports only the VPC platform, two AZs are returned.
+
+For more on EC2 platforms see [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-supported-platforms.html?icmpid=docs_ec2_console)
+
 ## Overview
 
 This project provides cloud formation templates and some container code to be used for setting up 
