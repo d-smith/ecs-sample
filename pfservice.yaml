@@ -79,7 +79,7 @@ Resources:
       - ContainerName: pf
         ContainerPort: '5000'
         TargetGroupArn: !Ref 'pfactorsTG'
-      Role: 'ecsServiceRole'
+      Role: !Ref ServiceRole
       TaskDefinition: !Ref 'pfactorsTaskDef'
 
   PFListenerRule:
@@ -196,3 +196,39 @@ Resources:
         StepAdjustments:
         - MetricIntervalUpperBound: 0
           ScalingAdjustment: -50
+
+  ServiceRole: 
+    Type: AWS::IAM::Role
+    Properties: 
+      RoleName: !Sub ecs-service-${AWS::StackName}
+      Path: /
+      AssumeRolePolicyDocument: |
+        {
+          "Statement": [{
+            
+            "Effect": "Allow",
+            "Principal": { "Service": [ "ecs.amazonaws.com" ]},
+            "Action": [ "sts:AssumeRole" ]
+          }]
+        }
+      Policies: 
+        - PolicyName: !Sub ecs-service-${AWS::StackName}
+          PolicyDocument: 
+            {
+              "Version": "2012-10-17",
+              "Statement": [{
+                "Effect": "Allow",
+                "Action": [
+                  "ec2:AuthorizeSecurityGroupIngress",
+                  "ec2:Describe*",
+                  "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
+                  "elasticloadbalancing:Describe*",
+                  "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
+                  "elasticloadbalancing:DeregisterTargets",
+                  "elasticloadbalancing:DescribeTargetGroups",
+                  "elasticloadbalancing:DescribeTargetHealth",
+                  "elasticloadbalancing:RegisterTargets"
+                ],
+                "Resource": "*"
+              }]
+            }
