@@ -17,19 +17,21 @@ Parameters:
 
 Resources:
 
-  hcPingTaskDef:
-    Type: AWS::ECS::TaskDefinition
-    Properties:
-      Family: HttpPingTask
-      ContainerDefinitions:
-        -
-          Name: hcping
-          Image: xtracdev/hcping
-          PortMappings:
-            -
-              ContainerPort: 4000
-              HostPort: 0
-          Memory: 150
+# TODO - move hc stuff to separate cf template
+
+#  hcPingTaskDef:
+#    Type: AWS::ECS::TaskDefinition
+#    Properties:
+#      Family: HttpPingTask
+#      ContainerDefinitions:
+#        -
+#          Name: hcping
+#          Image: xtracdev/hcping
+#          PortMappings:
+#            -
+#              ContainerPort: 4000
+#              HostPort: 0
+#          Memory: 150
 
   AlbSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -74,53 +76,66 @@ Resources:
       - CertificateArn: !Ref CertificateArn
       DefaultActions:
       - Type: forward
-        TargetGroupArn: !Ref 'hcpingTG'
-      LoadBalancerArn: !Ref 'ECSALB'
+        TargetGroupArn: !Ref DefaultTargetGroup
+      LoadBalancerArn: !Ref ECSALB
       Port: '443'
       Protocol: HTTPS
 
-  ECSALBListenerRule1:
-    Type: AWS::ElasticLoadBalancingV2::ListenerRule
-    DependsOn: ALBListener
-    Properties:
-      Actions:
-      - Type: forward
-        TargetGroupArn: !Ref 'hcpingTG'
-      Conditions:
-      - Field: path-pattern
-        Values: [/hcping]
-      ListenerArn: !Ref 'ALBListener'
-      Priority: 1
-
-  hcpingTG:
+# A tip of the hat to the ECS ref arch from awslabs for the following tidbit
+# We define a default target group here, as this is a mandatory Parameters
+# when creating an Application Load Balancer Listener. This is not used, instead
+# a target group is created per-service in each service template (../services/*)
+  DefaultTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    DependsOn: ECSALB
     Properties:
-      HealthCheckIntervalSeconds: 10
-      HealthCheckPath: /hcping
-      HealthCheckProtocol: HTTP
-      HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 2
-      Name: service1TG
-      Port: 80
-      Protocol: HTTP
-      UnhealthyThresholdCount: 2
+      Name: default
       VpcId:
         Fn::ImportValue: !Sub "${NetworkStack}-VPCID"
+      Port: 443
+      Protocol: HTTPS
 
-  hcpingService:
-    Type: AWS::ECS::Service
-    DependsOn: ALBListener
-    Properties:
-      Cluster:
-        Fn::ImportValue: !Sub "${ECSClusterStack}-EcsCluster"
-      DesiredCount: '2'
-      LoadBalancers:
-      - ContainerName: hcping
-        ContainerPort: '4000'
-        TargetGroupArn: !Ref 'hcpingTG'
-      Role: 'ecsServiceRole'
-      TaskDefinition: !Ref 'hcPingTaskDef'
+#  ECSALBListenerRule1:
+#    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+#    DependsOn: ALBListener
+#    Properties:
+#      Actions:
+#      - Type: forward
+#        TargetGroupArn: !Ref 'hcpingTG'
+#      Conditions:
+#      - Field: path-pattern
+#        Values: [/hcping]
+#      ListenerArn: !Ref 'ALBListener'
+#      Priority: 1
+
+ # hcpingTG:
+ #   Type: AWS::ElasticLoadBalancingV2::TargetGroup
+ #   DependsOn: ECSALB
+ #   Properties:
+ #     HealthCheckIntervalSeconds: 10
+ #     HealthCheckPath: /hcping
+ #     HealthCheckProtocol: HTTP
+ #     HealthCheckTimeoutSeconds: 5
+ #     HealthyThresholdCount: 2
+ #     Name: service1TG
+ #     Port: 80
+ #     Protocol: HTTP
+ #     UnhealthyThresholdCount: 2
+ #     VpcId:
+ #       Fn::ImportValue: !Sub "${NetworkStack}-VPCID"
+
+#  hcpingService:
+#    Type: AWS::ECS::Service
+#    DependsOn: ALBListener
+#    Properties:
+#      Cluster:
+#        Fn::ImportValue: !Sub "${ECSClusterStack}-EcsCluster"
+#      DesiredCount: '2'
+#      LoadBalancers:
+#      - ContainerName: hcping
+#        ContainerPort: '4000'
+#        TargetGroupArn: !Ref 'hcpingTG'
+#      Role: 'ecsServiceRole'
+#      TaskDefinition: !Ref 'hcPingTaskDef'
 
 Outputs:
   ALBListenerArn:
