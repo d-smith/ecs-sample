@@ -166,28 +166,18 @@ Resources:
       RouteTableId: !Ref RouteViaNatGW2
 
 Outputs:
-  StackVPC:
+  VpcId:
     Description: The ID of the VPC
     Value: !Ref Vpc
     Export:
-      Name: !Sub "${AWS::StackName}-VPCID"
+      Name: VpcId
 
   PrivateSubnet1:
     Value: !Ref PrivateSubnetAz1
     Export:
-      Name: !Sub "${AWS::StackName}-PrivateSubnet1"
+      Name: PrivateSubnet1
 
   PrivateSubnet2:
     Value: !Ref PrivateSubnetAz2
     Export:
-      Name: !Sub "${AWS::StackName}-PrivateSubnet2"
-
-  PublicSubnet1:
-    Value: !Ref PubSubnetAz1
-    Export:
-      Name: !Sub "${AWS::StackName}-PublicSubnet1"
-
-  PublicSubnet2:
-    Value: !Ref PubSubnetAz2
-    Export:
-      Name: !Sub "${AWS::StackName}-PublicSubnet2"
+      Name: PrivateSubnet2
