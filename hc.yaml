@@ -3,13 +3,13 @@ Description: >
     CF stack to instantiate the health check container accessible via the load balancer
 Parameters:
 
-  NetworkStack:
+  VpcId:
     Type: String
 
-  ECSClusterStack:
+  ECSCluster:
     Type: String
 
-  ALBStack:
+  ALBListenerArn:
     Type: String
 
 Resources:
@@ -18,8 +18,7 @@ Resources:
     Type: AWS::ECS::Service
     DependsOn: ListenerRule
     Properties: 
-      Cluster:
-        Fn::ImportValue: !Sub "${ECSClusterStack}-EcsCluster"
+      Cluster: !Ref ECSCluster
       Role: !Ref ServiceRole
       DesiredCount: 2
       TaskDefinition: !Ref TaskDefinition
@@ -27,20 +26,6 @@ Resources:
       - ContainerName: "hcping"
         ContainerPort: 4000
         TargetGroupArn: !Ref TargetGroup
-
-#  hcpingService:
-#    Type: AWS::ECS::Service
-#    DependsOn: ListenerRule
-#    Properties:
-#      Cluster:
-#        Fn::ImportValue: !Sub "${ECSClusterStack}-EcsCluster"
-#      DesiredCount: '2'
-#      LoadBalancers:
-#      - ContainerName: hcping
-#        ContainerPort: '4000'
-#        TargetGroupArn: !Ref 'hcpingTG'
-#      Role:!Ref ServiceRole
-#      TaskDefinition: !Ref 'hcPingTaskDef'
 
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
@@ -57,25 +42,11 @@ Resources:
               ContainerPort: 4000
               HostPort: 0
 
-#  hcPingTaskDef:
-#    Type: AWS::ECS::TaskDefinition
-#    Properties:
-#      Family: HttpPingTask
-#      ContainerDefinitions:
-#        -
-#          Name: hcping
-#          Image: xtracdev/hcping
-#          PortMappings:
-#            -
-#              ContainerPort: 4000
-#              HostPort: 0
-#          Memory: 150
 
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      VpcId:
-        Fn::ImportValue: !Sub "${NetworkStack}-VPCID"
+      VpcId: !Ref VpcId
       Port: 80
       Protocol: HTTP
       HealthCheckIntervalSeconds: 10
@@ -85,27 +56,12 @@ Resources:
       HealthyThresholdCount: 2
       UnhealthyThresholdCount: 2
 
- # hcpingTG:
- #   Type: AWS::ElasticLoadBalancingV2::TargetGroup
- #   DependsOn: ECSALB
- #   Properties:
- #     HealthCheckIntervalSeconds: 10
- #     HealthCheckPath: /hcping
- #     HealthCheckProtocol: HTTP
- #     HealthCheckTimeoutSeconds: 5
- #     HealthyThresholdCount: 2
- #     Name: service1TG
- #     Port: 80
- #     Protocol: HTTP
- #     UnhealthyThresholdCount: 2
- #     VpcId:
- #       Fn::ImportValue: !Sub "${NetworkStack}-VPCID"
+
 
   ListenerRule:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
     Properties:
-      ListenerArn:
-        Fn::ImportValue: !Sub "${ALBStack}-ALBListenerArn"
+      ListenerArn: !Ref ALBListenerArn
       Priority: 1
       Conditions:
       - Field: path-pattern
@@ -114,18 +70,6 @@ Resources:
       - TargetGroupArn: !Ref TargetGroup
         Type: forward
 
-#  ECSALBListenerRule1:
-#    Type: AWS::ElasticLoadBalancingV2::ListenerRule
-#    DependsOn: ALBListener
-#    Properties:
-#      Actions:
-#      - Type: forward
-#        TargetGroupArn: !Ref 'hcpingTG'
-#      Conditions:
-#      - Field: path-pattern
-#        Values: [/hcping]
-#      ListenerArn: !Ref 'ALBListener'
-#      Priority: 1
 
     # This IAM Role grants the service access to register/unregister with the 
     # Application Load Balancer (ALB). It is based on the default documented here:

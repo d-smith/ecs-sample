@@ -49,3 +49,13 @@ Resources:
                 VpcId: !GetAtt VPC.Outputs.VpcId
                 PublicSubnet1: !GetAtt VPC.Outputs.PublicSubnet1
                 PublicSubnet2: !GetAtt VPC.Outputs.PublicSubnet2
+
+    HC:
+        Type: AWS::CloudFormation::Stack
+        DependsOn: ALB
+        Properties:
+            TemplateURL: !Join ['/', [!Ref BucketRoot, hc.yaml]]
+            Parameters:
+                ALBListenerArn: !GetAtt ALB.Outputs.ALBListenerArn
+                ECSCluster: !GetAtt ECS.Outputs.EcsCluster
+                VpcId: !GetAtt VPC.Outputs.VpcId

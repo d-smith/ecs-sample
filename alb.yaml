@@ -85,17 +85,12 @@ Outputs:
   ALBListenerArn:
     Description: Listener associated with the ALB
     Value: !Ref 'ALBListener'
-    Export:
-      Name: !Sub "${AWS::StackName}-ALBListenerArn"
 
   ALBDnsName:
     Description: DNSName associated with the ALB
     Value: !GetAtt ECSALB.DNSName
-    Export:
-      Name: !Sub "${AWS::StackName}-ALBDnsName"
+    
 
   HostedZoneId:
     Description: Hosted zone id associated with the ELB
     Value: !GetAtt ECSALB.CanonicalHostedZoneID
-    Export:
-      Name: !Sub "${AWS::StackName}-HostedZoneId"
