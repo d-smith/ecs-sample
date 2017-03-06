@@ -169,15 +169,15 @@ Outputs:
   VpcId:
     Description: The ID of the VPC
     Value: !Ref Vpc
-    Export:
-      Name: VpcId
-
+ 
   PrivateSubnet1:
     Value: !Ref PrivateSubnetAz1
-    Export:
-      Name: PrivateSubnet1
 
   PrivateSubnet2:
     Value: !Ref PrivateSubnetAz2
-    Export:
-      Name: PrivateSubnet2
+
+  PublicSubnet1:
+    Value: !Ref PubSubnetAz1
+
+  PublicSubnet2:
+    Value: !Ref PubSubnetAz2

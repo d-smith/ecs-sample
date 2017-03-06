@@ -3,11 +3,6 @@ Description: >
   Create a load balancer that initially makes a config hc available for pinging through the 
   load balancer, and to which additional services can be added.
 Parameters:
-  NetworkStack:
-    Type: String
-
-  ECSClusterStack:
-    Type: String
 
   LoadBalancerName:
     Type: String
@@ -15,30 +10,23 @@ Parameters:
   CertificateArn:
     Type: String
 
+  VpcId:
+    Type: String
+
+  AppServerSecurityGroupID:
+    Type: String
+  PublicSubnet1:
+    Type: String
+  PublicSubnet2:
+    Type: String
+
 Resources:
-
-# TODO - move hc stuff to separate cf template
-
-#  hcPingTaskDef:
-#    Type: AWS::ECS::TaskDefinition
-#    Properties:
-#      Family: HttpPingTask
-#      ContainerDefinitions:
-#        -
-#          Name: hcping
-#          Image: xtracdev/hcping
-#          PortMappings:
-#            -
-#              ContainerPort: 4000
-#              HostPort: 0
-#          Memory: 150
 
   AlbSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: ALB Allowed Ports
-      VpcId: 
-        Fn::ImportValue: !Sub "${NetworkStack}-VPCID"
+      VpcId: !Ref VpcId
       SecurityGroupIngress:
         IpProtocol: tcp
         FromPort: 443
@@ -52,8 +40,7 @@ Resources:
         FromPort: '0'
         ToPort: '65535'
         SourceSecurityGroupId: !GetAtt AlbSecurityGroup.GroupId
-        GroupId: 
-          Fn::ImportValue: !Sub "${ECSClusterStack}-AppServerSecurityGroupID"
+        GroupId: !Ref AppServerSecurityGroupID
 
   ECSALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -64,8 +51,8 @@ Resources:
       - Key: idle_timeout.timeout_seconds
         Value: '30'
       Subnets:
-      - Fn::ImportValue: !Sub "${NetworkStack}-PublicSubnet1"
-      - Fn::ImportValue: !Sub "${NetworkStack}-PublicSubnet2"
+      - !Ref PublicSubnet1
+      - !Ref PublicSubnet2
       SecurityGroups: [!Ref 'AlbSecurityGroup']
 
   ALBListener:
@@ -89,53 +76,10 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       Name: default
-      VpcId:
-        Fn::ImportValue: !Sub "${NetworkStack}-VPCID"
+      VpcId: !Ref VpcId
       Port: 443
       Protocol: HTTPS
 
-#  ECSALBListenerRule1:
-#    Type: AWS::ElasticLoadBalancingV2::ListenerRule
-#    DependsOn: ALBListener
-#    Properties:
-#      Actions:
-#      - Type: forward
-#        TargetGroupArn: !Ref 'hcpingTG'
-#      Conditions:
-#      - Field: path-pattern
-#        Values: [/hcping]
-#      ListenerArn: !Ref 'ALBListener'
-#      Priority: 1
-
- # hcpingTG:
- #   Type: AWS::ElasticLoadBalancingV2::TargetGroup
- #   DependsOn: ECSALB
- #   Properties:
- #     HealthCheckIntervalSeconds: 10
- #     HealthCheckPath: /hcping
- #     HealthCheckProtocol: HTTP
- #     HealthCheckTimeoutSeconds: 5
- #     HealthyThresholdCount: 2
- #     Name: service1TG
- #     Port: 80
- #     Protocol: HTTP
- #     UnhealthyThresholdCount: 2
- #     VpcId:
- #       Fn::ImportValue: !Sub "${NetworkStack}-VPCID"
-
-#  hcpingService:
-#    Type: AWS::ECS::Service
-#    DependsOn: ALBListener
-#    Properties:
-#      Cluster:
-#        Fn::ImportValue: !Sub "${ECSClusterStack}-EcsCluster"
-#      DesiredCount: '2'
-#      LoadBalancers:
-#      - ContainerName: hcping
-#        ContainerPort: '4000'
-#        TargetGroupArn: !Ref 'hcpingTG'
-#      Role: 'ecsServiceRole'
-#      TaskDefinition: !Ref 'hcPingTaskDef'
 
 Outputs:
   ALBListenerArn:

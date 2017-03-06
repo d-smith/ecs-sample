@@ -10,6 +10,10 @@ Parameters:
         Type: String
     ClusterName:
         Type: String
+    LoadBalancerName:
+        Type: String
+    LoadBalancerCertARN:
+        Type: String
 
 Resources:
     VPC:
@@ -17,8 +21,9 @@ Resources:
         Properties:
             TemplateURL: !Join ['/', [!Ref BucketRoot, vpc-pub-priv.yaml]]
 
-    ESC:
+    ECS:
         Type: AWS::CloudFormation::Stack 
+        DependsOn: VPC
         Properties:
             TemplateURL: !Join ['/', [!Ref BucketRoot, ecs-cluster.yaml]]
             Parameters:
@@ -31,3 +36,16 @@ Resources:
                 VpcId: !GetAtt VPC.Outputs.VpcId
                 PrivateSubnet1: !GetAtt VPC.Outputs.PrivateSubnet1
                 PrivateSubnet2: !GetAtt VPC.Outputs.PrivateSubnet2
+
+    ALB:
+        Type: AWS::CloudFormation::Stack
+        DependsOn: ECS
+        Properties:
+            TemplateURL: !Join ['/', [!Ref BucketRoot, alb.yaml]]
+            Parameters:
+                LoadBalancerName: !Ref LoadBalancerName
+                CertificateArn: !Ref LoadBalancerCertARN
+                AppServerSecurityGroupID: !GetAtt ECS.Outputs.AppServerSecurityGroupID
+                VpcId: !GetAtt VPC.Outputs.VpcId
+                PublicSubnet1: !GetAtt VPC.Outputs.PublicSubnet1
+                PublicSubnet2: !GetAtt VPC.Outputs.PublicSubnet2
