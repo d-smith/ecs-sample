@@ -28,7 +28,6 @@ Resources:
       Runtime: "nodejs4.3"
       Timeout: "25"
 
-## TODO - parameterize the principal so this can port to other regions
   LambdaInvokePermission: 
     Type: "AWS::Lambda::Permission"
     Properties: 
@@ -67,5 +66,4 @@ Resources:
 Outputs:
     LambdaArn:
         Value: !GetAtt Logs2Sumo.Arn
-        Export:
-            Name: !Sub "${AWS::StackName}-LambdaArn"
+        

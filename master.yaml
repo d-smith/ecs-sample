@@ -1,0 +1,83 @@
+Description: >
+
+    This template pulls together the vpc, ecs cluster, alb, and
+    other parts of the full stack ecs template together to
+    install all the bits in one go.
+
+Parameters:
+
+    BucketRoot:
+        Type: String
+    ClusterName:
+        Type: String
+    LoadBalancerName:
+        Type: String
+    LoadBalancerCertARN:
+        Type: String
+    SumoEndpoint:
+        Type: String
+
+Resources:
+    VPC:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: !Join ['/', [!Ref BucketRoot, vpc-pub-priv.yaml]]
+
+    ECS:
+        Type: AWS::CloudFormation::Stack 
+        DependsOn: VPC
+        Properties:
+            TemplateURL: !Join ['/', [!Ref BucketRoot, ecs-cluster.yaml]]
+            Parameters:
+                AMIType: Rancher
+                KeyName: DC-US-WEST-1
+                DesiredCapacity: 2
+                MaxSize: 12
+                InstanceType: t2.micro
+                EcsClusterName: !Ref ClusterName
+                VpcId: !GetAtt VPC.Outputs.VpcId
+                PrivateSubnet1: !GetAtt VPC.Outputs.PrivateSubnet1
+                PrivateSubnet2: !GetAtt VPC.Outputs.PrivateSubnet2
+
+    ALB:
+        Type: AWS::CloudFormation::Stack
+        DependsOn: ECS
+        Properties:
+            TemplateURL: !Join ['/', [!Ref BucketRoot, alb.yaml]]
+            Parameters:
+                LoadBalancerName: !Ref LoadBalancerName
+                CertificateArn: !Ref LoadBalancerCertARN
+                AppServerSecurityGroupID: !GetAtt ECS.Outputs.AppServerSecurityGroupID
+                VpcId: !GetAtt VPC.Outputs.VpcId
+                PublicSubnet1: !GetAtt VPC.Outputs.PublicSubnet1
+                PublicSubnet2: !GetAtt VPC.Outputs.PublicSubnet2
+
+    HC:
+        Type: AWS::CloudFormation::Stack
+        DependsOn: ALB
+        Properties:
+            TemplateURL: !Join ['/', [!Ref BucketRoot, hc.yaml]]
+            Parameters:
+                ALBListenerArn: !GetAtt ALB.Outputs.ALBListenerArn
+                ECSCluster: !GetAtt ECS.Outputs.ECSCluster
+                VpcId: !GetAtt VPC.Outputs.VpcId
+
+    SUMO:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: !Join ['/', [!Ref BucketRoot, sumolambda.yaml]]
+            Parameters:
+                SumoEndpoint: !Ref SumoEndpoint
+                CodeFileName: sumo.zip
+                CodeBucketName: xtdc-sumo
+
+    PF:
+        Type: AWS::CloudFormation::Stack
+        DependsOn: ALB
+        Properties:
+            TemplateURL: !Join ['/', [!Ref BucketRoot, pfservice.yaml]]
+            Parameters:
+                LambdaArn: !GetAtt SUMO.Outputs.LambdaArn
+                ALBListenerArn: !GetAtt ALB.Outputs.ALBListenerArn
+                ECSCluster: !GetAtt ECS.Outputs.ECSCluster
+                VpcId: !GetAtt VPC.Outputs.VpcId

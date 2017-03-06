@@ -3,16 +3,13 @@ Description: >
   Create a service based on the pfactors container, which is relatively easy
   to call in a manner that will trigger CPU based autoscaling reules.
 Parameters:
-  NetworkStack:
+  LambdaArn:
     Type: String
-
-  ECSClusterStack:
+  VpcId:
     Type: String
-
-  ALBStack:
+  ECSCluster:
     Type: String
-
-  SumoLambdaStack:
+  ALBListenerArn:
     Type: String
 
 Resources:
@@ -29,8 +26,7 @@ Resources:
       LogGroupName: 
         Ref: "CloudwatchLogsGroup"
       FilterPattern: ""
-      DestinationArn: 
-        Fn::ImportValue: !Sub "${SumoLambdaStack}-LambdaArn"
+      DestinationArn: !Ref LambdaArn
 
   pfactorsTaskDef:
     Type: AWS::ECS::TaskDefinition
@@ -65,15 +61,13 @@ Resources:
       Port: 80
       Protocol: HTTP
       UnhealthyThresholdCount: 2
-      VpcId:
-        Fn::ImportValue: !Sub "${NetworkStack}-VPCID"
+      VpcId: !Ref VpcId
 
   pfactorsService:
     Type: AWS::ECS::Service
     DependsOn: PFListenerRule
     Properties:
-      Cluster:
-        Fn::ImportValue: !Sub "${ECSClusterStack}-EcsCluster"
+      Cluster: !Ref ECSCluster
       DesiredCount: '2'
       LoadBalancers:
       - ContainerName: pf
@@ -91,8 +85,7 @@ Resources:
       Conditions:
       - Field: path-pattern
         Values: [/pf/*]
-      ListenerArn:
-        Fn::ImportValue: !Sub "${ALBStack}-ALBListenerArn"
+      ListenerArn: !Ref ALBListenerArn
       Priority: 2
 
   scalableTarget:
@@ -102,7 +95,7 @@ Resources:
       MaxCapacity: 12
       MinCapacity: 2
       ResourceId: 
-        !Join ['', [service/, "Fn::ImportValue": !Sub "${ECSClusterStack}-EcsCluster", /, !GetAtt [pfactorsService, Name]]]
+        !Join ['', [service/,  !Ref ECSCluster, /, !GetAtt [pfactorsService, Name]]]
       RoleARN: !GetAtt [AutoscalingRole, Arn]
       ScalableDimension: ecs:service:DesiredCount
       ServiceNamespace: ecs
@@ -143,8 +136,7 @@ Resources:
       - Name: ServiceName
         Value: !GetAtt [pfactorsService, Name]
       - Name: ClusterName
-        Value: 
-          "Fn::ImportValue": !Sub "${ECSClusterStack}-EcsCluster"
+        Value: !Ref ECSCluster
 
   ScaleOutECSService:
     Type: AWS::ApplicationAutoScaling::ScalingPolicy
@@ -178,8 +170,7 @@ Resources:
       - Name: ServiceName
         Value: !GetAtt [pfactorsService, Name]
       - Name: ClusterName
-        Value: 
-          "Fn::ImportValue": !Sub "${ECSClusterStack}-EcsCluster"
+        Value: !Ref ECSCluster
 
 
   ScaleInECSService:
