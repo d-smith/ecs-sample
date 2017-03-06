@@ -253,6 +253,6 @@ Outputs:
     Description: Security group id of the ECS cluster instances
     Value: !GetAtt EcsSecurityGroup.GroupId
 
-  EcsCluster:
+  ECSCluster:
     Value: !Ref MyCluster
 

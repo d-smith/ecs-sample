@@ -5,3 +5,4 @@ aws s3 cp alb.yaml $S3_TEMPLATE_BUCKET
 aws s3 cp hc.yaml $S3_TEMPLATE_BUCKET
 aws s3 cp sumolambda.yaml $S3_TEMPLATE_BUCKET
 aws s3 cp pfservice.yaml $S3_TEMPLATE_BUCKET
+aws s3 cp master.yaml $S3_TEMPLATE_BUCKET

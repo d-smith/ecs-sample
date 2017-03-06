@@ -14,6 +14,8 @@ Parameters:
         Type: String
     LoadBalancerCertARN:
         Type: String
+    SumoEndpoint:
+        Type: String
 
 Resources:
     VPC:
@@ -57,5 +59,25 @@ Resources:
             TemplateURL: !Join ['/', [!Ref BucketRoot, hc.yaml]]
             Parameters:
                 ALBListenerArn: !GetAtt ALB.Outputs.ALBListenerArn
-                ECSCluster: !GetAtt ECS.Outputs.EcsCluster
+                ECSCluster: !GetAtt ECS.Outputs.ECSCluster
+                VpcId: !GetAtt VPC.Outputs.VpcId
+
+    SUMO:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: !Join ['/', [!Ref BucketRoot, sumolambda.yaml]]
+            Parameters:
+                SumoEndpoint: !Ref SumoEndpoint
+                CodeFileName: sumo.zip
+                CodeBucketName: xtdc-sumo
+
+    PF:
+        Type: AWS::CloudFormation::Stack
+        DependsOn: ALB
+        Properties:
+            TemplateURL: !Join ['/', [!Ref BucketRoot, pfservice.yaml]]
+            Parameters:
+                LambdaArn: !GetAtt SUMO.Outputs.LambdaArn
+                ALBListenerArn: !GetAtt ALB.Outputs.ALBListenerArn
+                ECSCluster: !GetAtt ECS.Outputs.ECSCluster
                 VpcId: !GetAtt VPC.Outputs.VpcId
