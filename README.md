@@ -131,3 +131,9 @@ the load balancer with the parent name associated with the hosted zone.
 For example, in the hosted zone config if the name is `foo.com.` and you
 want to associate `dev` in that domain with the load balancer, then
 for the domain name parameter you would specify `dev.foo.com`. 
+
+
+## Helpful Exports
+export AWS_DEFAULT_PROFILE=xxx
+export https_proxy=xxx
+export S3_TEMPLATE_BUCKET=xxx
