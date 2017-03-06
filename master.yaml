@@ -1,6 +1,6 @@
 Description: >
 
-    This template pulls together the vpc, ecs cluster, alb, amd
+    This template pulls together the vpc, ecs cluster, alb, and
     other parts of the full stack ecs template together to
     install all the bits in one go.
 
