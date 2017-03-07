@@ -57,7 +57,6 @@ Resources:
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
-      Name: pfactorsTG
       Port: 80
       Protocol: HTTP
       UnhealthyThresholdCount: 2

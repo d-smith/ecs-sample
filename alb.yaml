@@ -75,7 +75,6 @@ Resources:
   DefaultTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: default
       VpcId: !Ref VpcId
       Port: 443
       Protocol: HTTPS
