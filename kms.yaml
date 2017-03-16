@@ -1,0 +1,67 @@
+Description: >
+
+    This template creates a key that can be used to encrypt and decrypt data, for example
+    it can be used to secure data in an atom feed that we might want to protect.
+
+Parameters:
+  KeyOwnerArn:
+    Type: String
+  KeyUserArn:
+    Type: String
+  KeyAlias:
+    Type: String
+
+Resources:
+
+
+  myKey: 
+    Type: "AWS::KMS::Key"
+    Properties: 
+      Description: "A sample key"
+      KeyPolicy: 
+        Version: "2012-10-17"
+        Id: "key-default-1"
+        Statement: 
+          - 
+            Sid: "Allow administration of the key"
+            Effect: "Allow"
+            Principal: 
+              AWS: !Ref KeyOwnerArn
+            Action: 
+              - "kms:Create*"
+              - "kms:Describe*"
+              - "kms:Enable*"
+              - "kms:List*"
+              - "kms:Put*"
+              - "kms:Update*"
+              - "kms:Revoke*"
+              - "kms:Disable*"
+              - "kms:Get*"
+              - "kms:Delete*"
+              - "kms:ScheduleKeyDeletion"
+              - "kms:CancelKeyDeletion"
+            Resource: "*"
+          - 
+            Sid: "For encryption"
+            Effect: "Allow"
+            Principal: 
+              AWS: !Ref KeyUserArn
+            Action: 
+              - "kms:Encrypt"
+              - "kms:ReEncrypt*"
+            Resource: "*"
+          - 
+            Sid: "For decryption"
+            Effect: "Allow"
+            Principal: 
+              AWS: !Ref KeyUserArn
+            Action: 
+              - "kms:Decrypt"
+            Resource: "*"
+
+  myKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Join ['/', ['alias', !Ref KeyAlias]]
+      TargetKeyId:
+        Ref: myKey
