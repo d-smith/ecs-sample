@@ -12,6 +12,9 @@ Parameters:
   ALBListenerArn:
     Type: String
 
+  Registry:
+    Type: String
+
 Resources:
 
   Service: 
@@ -35,7 +38,7 @@ Resources:
         - 
           Name: hcping
           Essential: true
-          Image: xtracdev/hcping
+          Image: !Join ['/', [!Ref Registry, 'xtracdev/hcping:latest']]
           Memory: 128
           PortMappings:
             -

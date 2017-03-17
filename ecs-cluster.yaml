@@ -131,7 +131,8 @@ Resources:
           - Effect: Allow
             Action: ['ecs:CreateCluster', 'ecs:DeregisterContainerInstance', 'ecs:DiscoverPollEndpoint',
               'ecs:Poll', 'ecs:RegisterContainerInstance', 'ecs:StartTelemetrySession',
-              'ecs:Submit*', 'logs:CreateLogStream', 'logs:PutLogEvents', 'logs:CreateLogGroup','logs:DescribeLogStreams']
+              'ecs:Submit*', 'logs:CreateLogStream', 'logs:PutLogEvents', 'logs:CreateLogGroup','logs:DescribeLogStreams',
+              'ecr:BatchCheckLayerAvailability','ecr:BatchGetImage','ecr:GetDownloadUrlForLayer','ecr:GetAuthorizationToken']
             Resource: '*'
 
   EC2InstanceProfile:
