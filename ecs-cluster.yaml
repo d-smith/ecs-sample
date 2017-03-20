@@ -257,3 +257,6 @@ Outputs:
   ECSCluster:
     Value: !Ref MyCluster
 
+  EC2RoleArn:
+    Value: !GetAtt EC2Role.Arn
+

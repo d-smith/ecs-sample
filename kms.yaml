@@ -1,15 +1,26 @@
 Description: >
 
     This template creates a key that can be used to encrypt and decrypt data, for example
-    it can be used to secure data in an atom feed that we might want to protect.
+    it can be used to secure data in an atom feed that we might want to protect. If not
+    specified the encrypter user arn is set to the key owner arn
+
 
 Parameters:
   KeyOwnerArn:
     Type: String
-  KeyUserArn:
+  DecrypterUserArn:
     Type: String
+  EncrypterUserArn:
+    Type: String
+    Default: ''
   KeyAlias:
     Type: String
+  EncrypterInstanceRoleArn:
+    Type: String
+
+Conditions:
+  NoEncrypterUser:
+    !Equals [!Ref EncrypterUserArn, '']
 
 Resources:
 
@@ -45,7 +56,17 @@ Resources:
             Sid: "For encryption"
             Effect: "Allow"
             Principal: 
-              AWS: !Ref KeyUserArn
+              AWS: !Ref EncrypterInstanceRoleArn
+            Action: 
+              - "kms:Encrypt"
+              - "kms:ReEncrypt*"
+            Resource: "*"
+          - 
+            Sid: "For encryption"
+            Effect: "Allow"
+            Principal: 
+              AWS:
+                !Ref EncrypterUserArn
             Action: 
               - "kms:Encrypt"
               - "kms:ReEncrypt*"
@@ -54,7 +75,7 @@ Resources:
             Sid: "For decryption"
             Effect: "Allow"
             Principal: 
-              AWS: !Ref KeyUserArn
+              AWS: !Ref DecrypterUserArn
             Action: 
               - "kms:Decrypt"
             Resource: "*"
