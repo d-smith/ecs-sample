@@ -12,6 +12,9 @@ Parameters:
     Type: String
   EncrypterUserArn:
     Type: String
+    Description: >
+      User ARN for encrypting data. Defaults to the key owner if not specifified. Typically
+      only used for unit testing. Instance role is leveraged for server side encryption. 
     Default: ''
   KeyAlias:
     Type: String
@@ -60,16 +63,21 @@ Resources:
             Action: 
               - "kms:Encrypt"
               - "kms:ReEncrypt*"
+              - "kms:GenerateDataKey"
             Resource: "*"
           - 
             Sid: "For encryption"
             Effect: "Allow"
             Principal: 
               AWS:
-                !Ref EncrypterUserArn
+                !If
+                  - NoEncrypterUser
+                  - !Ref EncrypterInstanceRoleArn
+                  - !Ref EncrypterUserArn
             Action: 
               - "kms:Encrypt"
               - "kms:ReEncrypt*"
+              - "kms:GenerateDataKey"
             Resource: "*"
           - 
             Sid: "For decryption"
