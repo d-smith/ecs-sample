@@ -52,44 +52,44 @@ Parameters:
 Mappings:
   AWSRegionToAMI:
     us-east-1:
-      AMIID: ami-eca289fb
+      AMIID: ami-275ffe31
     us-east-2:
-      AMIID: ami-446f3521
+      AMIID: ami-62745007
     us-west-1:
-      AMIID: ami-9fadf8ff
+      AMIID: ami-689bc208
     us-west-2:
-      AMIID: ami-7abc111a
+      AMIID: ami-62d35c02
     eu-west-1:
-      AMIID: ami-a1491ad2
+      AMIID: ami-95f8d2f3
     eu-central-1:
-      AMIID: ami-54f5303b
+      AMIID: ami-085e8a67
     ap-northeast-1:
-      AMIID: ami-9cd57ffd
+      AMIID: ami-f63f6f91
     ap-southeast-1:
-      AMIID: ami-a900a3ca
+      AMIID: ami-b4ae1dd7
     ap-southeast-2:
-      AMIID: ami-5781be34
+      AMIID: ami-fbe9eb98
 
 # Rancher AMIs via https://github.com/rancher/os/blob/master/README.md
   RancherRegionToAMI:
     us-east-1:
-      AMIID: ami-f200cee4
+      AMIID: ami-d969c2cf
     us-east-2:
-      AMIID: ami-eefadf8b
+      AMIID: ami-b72400d2
     us-west-1:
-      AMIID: ami-e3045b83
+      AMIID: ami-c3762ea3
     us-west-2:
-      AMIID: ami-e26bec82
+      AMIID: ami-b327aed3
     eu-west-1:
-      AMIID: ami-aa2d0ccc
+      AMIID: ami-7fdbed19
     eu-central-1:
-      AMIID: ami-5af93235
+      AMIID: ami-0c845263
     ap-northeast-1:
-      AMIID: ami-5791dd30
+      AMIID: ami-1c69357b
     ap-southeast-1:
-      AMIID: ami-a306b1c0
+      AMIID: ami-2f5fed4c
     ap-southeast-2:
-      AMIID: ami-8aa4a5e9
+      AMIID: ami-74f5f817
 
 
 
