@@ -4,6 +4,7 @@ Description: >
   to call in a manner that will trigger CPU based autoscaling reules.
 Parameters:
   LambdaArn:
+    Description: Lambda function arn to send cloud watch log output to Sumo Logic
     Type: String
   VpcId:
     Type: String
