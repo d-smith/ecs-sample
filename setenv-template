@@ -3,5 +3,5 @@ export AWS_DEFAULT_PROFILE=
 export https_proxy=
 export CF_BUCKET=
 export SUMO_BUCKET=
-export KEYNAME=
+export KEYPAIRNAME=
 export SUMO_ENDPOINT=
