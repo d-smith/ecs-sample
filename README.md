@@ -17,7 +17,7 @@ closely reviewed to make sure the transition was done cleanly.
 ## EC2 Platform Note
 
 The vpc template assumes the EC2 platform is VPC, and that the default subnets have not been
-delete from the account. If this assumption does not hold, there could be problems running the template in EC2 classic
+deleted from the account. If this assumption does not hold, there could be problems running the template in EC2 classic
 platforms based on the differences in how !GetAZs behaves. For example, in us-west-1, for the EC2 Classic
 platform, 3 AZs are returned, only two of which may contain VPC subnets (indexes 0 and 2). When run
 from an account that supports only the VPC platform, two AZs are returned.
@@ -121,7 +121,7 @@ obtain one is via the aws cli: `aws acm list-certificates`
 ## Route 53 Parameters
 
 Use the AWS CLI to find the zone name to form the record set for. This can
-be done via `aws route53 list-hosted-zones'. The name is the last component
+be done via `aws route53 list-hosted-zones`. The name is the last component
 of the Config Id property - for example if Id is /hostedzone/xxx then the 
 zone name is xxx.
 
@@ -137,3 +137,8 @@ for the domain name parameter you would specify `dev.foo.com`.
 export AWS_DEFAULT_PROFILE=xxx
 export https_proxy=xxx
 export S3_TEMPLATE_BUCKET=xxx
+
+## Limitations
+
+Some of the stacks use IAM names in the global namespace that contain the stack name. So while you can instantiate the
+same stack from such templates, the stack names need to be unique across regions.
